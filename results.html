@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}'{{ query }}' 시세 · Dealight{% endblock %}
+{% block content %}
+
+<div class="refine-bar">
+  <form action="{{ url_for('search_route') }}" method="get">
+    <input class="text-input" type="text" name="query" value="{{ query }}" placeholder="물건 이름" required>
+    <select name="condition">
+      {% for c in conditions %}
+        <option value="{{ c }}" {% if c == condition %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <input class="text-input" type="text" name="my_price" inputmode="numeric"
+           value="{{ my_price or '' }}" placeholder="생각 중인 가격(선택)" style="max-width:190px;">
+    <button class="btn-primary" type="submit">다시 검색</button>
+  </form>
+</div>
+
+{% if not matches %}
+  <div class="empty">
+    <h2>'{{ query }}'에 대한 매물을 찾지 못했어요.</h2>
+    <p class="lead">아래 품목 이름으로 다시 검색해 보세요.</p>
+    <div class="chips">
+      {% for item in items %}
+        <a class="chip" href="{{ url_for('search_route', query=item, condition=condition) }}">{{ item }}</a>
+      {% endfor %}
+    </div>
+  </div>
+{% else %}
+
+  {% if result.verdict %}
+    <div class="verdict {{ result.verdict.tone }}">
+      <div>
+        <div class="vlabel">{{ result.verdict.label }}</div>
+        <div class="vdesc">
+          입력하신 가격 {{ won(result.verdict.my_price) }}보다 싼 매물은 전체의 약 {{ result.verdict.rank }}%입니다.
+        </div>
+      </div>
+      <div class="vinfo">
+        추천 시세 대비<br>
+        {% if result.verdict.diff > 0 %}+{{ result.verdict.ratio }}% 높음
+        {% elif result.verdict.diff < 0 %}{{ result.verdict.ratio }}% 낮음
+        {% else %}동일{% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <section class="summary">
+    <div class="sub">'{{ matched_items|join(", ") }}' · {{ condition }} 기준</div>
+    <div class="reco-row">
+      <span class="reco-label">추천 시세</span>
+      <span class="reco-price">{{ won(result.recommended) }}</span>
+    </div>
+    <span class="count">매물 {{ result.stats.count }}건 분석</span>
+
+    <div class="stat-cards">
+      <div class="stat-card c-blue">
+        <div class="cap">최저가</div><div class="val">{{ won(result.stats.min) }}</div>
+      </div>
+      <div class="stat-card c-ink">
+        <div class="cap">평균가</div><div class="val">{{ won(result.stats.mean) }}</div>
+      </div>
+      <div class="stat-card c-yellow">
+        <div class="cap">중앙값</div><div class="val">{{ won(result.stats.median) }}</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="cap">최고가</div><div class="val">{{ won(result.stats.max) }}</div>
+      </div>
+    </div>
+
+    <div class="fair-range">
+      <span class="cap">{{ condition }} 적정 가격대</span>
+      <span class="range">{{ won(result.fair_low) }} ~ {{ won(result.fair_high) }}</span>
+    </div>
+  </section>
+
+  {% if multi %}
+    <p class="note">⚠️ 검색 결과에 여러 모델({{ matched_items|join(", ") }})이 섞여 있습니다.
+       더 정확한 시세를 보려면 검색어를 구체적으로 입력해 보세요.</p>
+  {% endif %}
+
+  <h2 class="list-title">현재 올라온 매물 ({{ matches|length }}건)</h2>
+  <ul class="listings">
+    {% for l in matches[:40] %}
+      <li class="listing">
+        <span class="l-title">{{ l.title }}</span>
+        <span class="l-cond">{{ l.condition }}</span>
+        <span class="l-meta">{{ l.region }} · {{ l.date }}</span>
+        <span class="l-price">{{ won(l.price) }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+  {% if matches|length > 40 %}
+    <p class="note">상위 40건만 표시했습니다. (총 {{ matches|length }}건)</p>
+  {% endif %}
+
+{% endif %}
+
+{% endblock %}
