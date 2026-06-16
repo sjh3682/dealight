@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dealight · 중고 적정가 판단{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="{{ url_for('index') }}">
+      <span class="mark-squares"><i class="sq-red"></i><i class="sq-blue"></i><i class="sq-yellow"></i></span>
+      Dealight
+    </a>
+    <span class="tagline">중고 적정가, 한눈에</span>
+  </header>
+  <div class="accent-bar"><span></span><span></span><span></span><span></span><span></span></div>
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    표시되는 매물은 학습용으로 생성한 가상 데이터입니다. 실제 수집 데이터로 교체하면 그대로 작동합니다. · Dealight
+  </footer>
+</body>
+</html>
